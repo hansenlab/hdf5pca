@@ -1,3 +1,6 @@
+# 6/26
+# Test crossprod function for HDF5 matrices
+
 # Resources:
 # https://gist.github.com/LTLA/7cf5d6231a9616084803429348760760 
 
@@ -33,7 +36,7 @@ REDUCE <- function(x, y) {
   x + y
 }
 
-row_n = 1000
+row_n = 100 # Number of rows per block read
 X <- DelayedArray(matrix(rnorm(50000*1000), ncol=1000))
 system.time({
   X_disk = writeHDF5Array(X, chunkdim = c(row_n, ncol(X)))
