@@ -1,4 +1,9 @@
-# 7/5
+# crossprod_test.R
+# ---------------------------------------------
+#
+# Author:             Albert Kuo
+# Date last modified: July 9, 2018
+#
 # Test crossprod function for HDF5 matrices
 
 # Resources:
