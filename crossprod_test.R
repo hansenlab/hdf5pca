@@ -2,7 +2,7 @@
 # ---------------------------------------------
 #
 # Author:             Albert Kuo
-# Date last modified: July 9, 2018
+# Date last modified: July 18, 2018
 #
 # Test crossprod function for HDF5 matrices
 
@@ -21,7 +21,7 @@ ITER <- function(x, grid = NULL) {
       return(NULL)
     b <<- b + 1L
     viewport <- grid[[b]]
-    block <- DelayedArray:::extract_block(x, viewport)
+    block <- DelayedArray:::read_block(x, viewport)
     if (!is.array(block))
       block <- DelayedArray:::.as_array_or_matrix(block)
     attr(block, "from_grid") <- grid
@@ -39,8 +39,10 @@ REDUCE <- function(x, y) {
 }
 
 row_n = 100 # Number of rows per block read
-X <- DelayedArray(matrix(rnorm(50000*1000), ncol=1000))
-G <- RegularArrayGrid(dim(X), c(row_n, ncol(X)))
+m = 500     # Total number of rows
+n = 1000    # Total number of columns
+X <- DelayedArray(matrix(rnorm(m*n), ncol=n))
+G <- RegularArrayGrid(dim(X), c(row_n, n))
 
 ## Test 1
 # Regular crossprod
@@ -56,27 +58,27 @@ system.time({
 
 ## Test 3
 # Crossprod on DelayedArray of HDF5 matrix
-use_HDF5 = T
-if(use_HDF5){
-  system.time({
-    X_disk = writeHDF5Array(X, chunkdim = c(row_n, ncol(X)))
-  })
-  X2 = DelayedArray(X_disk)
-}
-system.time({
-  out2 <- bpiterate(ITER(X2, G), FUN, REDUCE = REDUCE, BPPARAM = MulticoreParam(2))
-})
+# system.time({
+#   X_disk = writeHDF5Array(X, chunkdim = c(row_n, ncol(X)))
+# })
+# X2 = DelayedArray(X_disk)
+# 
+# system.time({
+#   out2 <- bpiterate(ITER(X2, G), FUN, REDUCE = REDUCE, BPPARAM = MulticoreParam(2))
+# })
 
 ## Test 4
 # Crossprod on list of matrices
-blocks_n = 50000/row_n # Length of list
-X_ls  = lapply(1:blocks_n, function(i) matrix(rnorm(row_n*1000), ncol=1000))
-system.time({
-  crossprod_ls = lapply(X_ls, function(X) crossprod(X))
-  out3 = Reduce(REDUCE, crossprod_ls)
-})
+# blocks_n = m/row_n # Length of list
+# X_ls  = lapply(1:blocks_n, function(i) matrix(rnorm(row_n*1000), ncol=1000))
+# system.time({
+#   crossprod_ls = lapply(X_ls, function(X) crossprod(X))
+#   out3 = Reduce(REDUCE, crossprod_ls)
+# })
 
 all.equal(out, ref)
+
+
 
 # (Old) Notes: 
 # 1) Install beachmat and Rhdf5lib
